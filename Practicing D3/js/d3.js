@@ -1,85 +1,272 @@
 $( document ).ready(function() {
-var length = 0;
-var canvas = null;
-var created = false;
-var allPasswords = passwordData.allPasswords
+    // PCA (global);
+    var length = 0;
+    var canvas = null;
+    var created = false;
+    var locationData = [];
+    var allPasswords = passwordData.allPasswords
+    var canvasSize = 400;
+    var outerCircleSize = canvasSize/2;
+    var halfData = 0;
+    //
+    // var storeX = [];
+    // var storeY = [];
+    // var combineXY = [];
+    //
+    // var testSNE = [];
+
+    var text = "";
+
+    // SNE test
+    var opt = {}
+    opt.epsilon = 10; // epsilon is learning rate (10 = default)
+    opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
+    opt.dim = 2; // dimensionality of the embedding (2 = default)
+    var tsne = new tsnejs.tSNE(opt); // create a tSNE instance
+
+
+
     function svgExample() {
-        canvas = d3.select(".container")
+            canvas = d3.select(".container")
             .append("svg")
-            .attr("width", 200)
-            .attr("height", 200);
+            .attr("width", canvasSize)
+            .attr("height", canvasSize);
 
         var circle = canvas.append("circle")
-            .attr("cx", 100)
-            .attr("cy", 100)
-            .attr("r", 100)
+            .attr("cx", outerCircleSize)
+            .attr("cy", outerCircleSize)
+            .attr("r", outerCircleSize)
             .attr("fill", "orange");
 
-            update(canvas);
-
-        var line = canvas.append("line")
-            .attr("x1", 100)
-            .attr("x2", 100)
-            .attr("y1", 100)
-            .attr("y2", 200)
-            .attr("stroke", "grey")
-            .attr("stroke-width", 2)
-
+        updatePassCircles();
     }
+    //
+    //     var line = canvas.append("line")
+    //         .attr("x1", 100)
+    //         .attr("x2", 100)
+    //         .attr("y1", 100)
+    //         .attr("y2", 200)
+    //         .attr("stroke", "grey")
+    //         .attr("stroke-width", 2)
+    //
 
-    function update() {
-        var locationData = [length, length]
-        // console.log(locationData);
+
+    function updatePassCircles() {
+        // storeX = [];
+        // storeY = [];
+        // combineXY = [];
+
         if (created) {
             $(".passCircle").remove();
+            $(".displayPass").remove();
         }
-        var passwords = canvas.selectAll("circle")
-            .data(locationData)
-            .enter()
 
-                .append("circle")
-                .attr("fill", "blue")
-                .attr("class", "passCircle")
-                .attr("cx", function(d, z) {
-                    // console.log("test", d, i);
-                    return 50 + d*2;
-                })
-                .attr("cy", function (d, i) {
-                    // console.log(d, i);
-                    return Math.random()*150;
-                })
-                .attr ("r", 5)
+        if ($(".password").val().length != 0 ) {
+            text = canvas.append("text")
+                .attr("class", "displayPass")
+                .attr("x", outerCircleSize)
+                .attr("y", outerCircleSize)
+                .text($(".password").val());
+            // Center the text, text-anchor is the property
+            text.style("text-anchor", "middle")
 
-
-                created = true;
+            // Put the password circles in the canvas
+            var passwords = canvas.selectAll("circle")
+                // [0] are names and [1] are distances
+                .data(locationData)
+                .enter()
+                    .append("circle")
+                    .attr("fill", "blue")
+                    .attr("class", (d) => d ?  '' + d[0] + '' + '  passCircle' + '': "")
+                    .attr("cx", function(d) {
+                        // Half distance for X and scale up
+                        halfData = (d[1]/2) * 3;
+                        // Pick true or false to plot on a random section of the circle
+                        var random_boolean = Math.random() >= 0.5;
+                        if (random_boolean) {
+                            var x = outerCircleSize + halfData;
+                        } else {
+                            var x = outerCircleSize - halfData;
+                        }
+                        return x;
+                    })
+                    .attr("cy", function (d, i) {
+                        // Half distance for X and scale up
+                        halfData = (d[1]/2) * 3;
+                        // Pick true or false to plot on a random section of the circle
+                        var random_boolean = Math.random() >= 0.5;
+                        if (random_boolean) {
+                            var y = outerCircleSize + halfData;
+                        } else {
+                            var y = outerCircleSize - halfData;
+                        }
+                        return y;
+                    })
+                    // Radius will be just 5 for now
+                    .attr ("r", function (d) {
+                        return 5;
+                    })
+                    created = true;
+            }
     }
 
     function getPassword() {
-
-
-
         $( ".password" ).keyup(function() {
           length = $(".password").val().length;
+          locationData = [];
           for (var i = 0; i<allPasswords.length; i++){
-              var lDistance = levenshteinDistance(passwordData.allPasswords[i].password, $(".password").val());
+              var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
+              locationData.push([allPasswords[i].password, lDistance]);
+              // console.log(lDistance);
           }
-          console.log(lDistance);
-          update();
+          updatePassCircles();
+          // runPCA();
+          // runTSne();
+          // console.log(locationData);
         });
     }
 
-    function levenshteinDistance (s, t) {
-        if (!s.length) return t.length;
-        if (!t.length) return s.length;
 
-        return Math.min(
-            levenshteinDistance(s.substr(1), t) + 1,
-            levenshteinDistance(t.substr(1), s) + 1,
-            levenshteinDistance(s.substr(1), t.substr(1)) + (s[0] !== t[0] ? 1 : 0)
-        ) + 1;
+    // https://stackoverflow.com/questions/18516942/fastest-general-purpose-levenshtein-javascript-implementation
+    // Took code from here
+    function levenshtein(s, t) {
+        if (s === t) {
+            return 0;
+        }
+        var n = s.length, m = t.length;
+        if (n === 0 || m === 0) {
+            return n + m;
+        }
+        var x = 0, y, a, b, c, d, g, h, k;
+        var p = new Array(n);
+        for (y = 0; y < n;) {
+            p[y] = ++y;
+        }
+
+        for (; (x + 3) < m; x += 4) {
+            var e1 = t.charCodeAt(x);
+            var e2 = t.charCodeAt(x + 1);
+            var e3 = t.charCodeAt(x + 2);
+            var e4 = t.charCodeAt(x + 3);
+            c = x;
+            b = x + 1;
+            d = x + 2;
+            g = x + 3;
+            h = x + 4;
+            for (y = 0; y < n; y++) {
+                k = s.charCodeAt(y);
+                a = p[y];
+                if (a < c || b < c) {
+                    c = (a > b ? b + 1 : a + 1);
+                }
+                else {
+                    if (e1 !== k) {
+                        c++;
+                    }
+                }
+
+                if (c < b || d < b) {
+                    b = (c > d ? d + 1 : c + 1);
+                }
+                else {
+                    if (e2 !== k) {
+                        b++;
+                    }
+                }
+
+                if (b < d || g < d) {
+                    d = (b > g ? g + 1 : b + 1);
+                }
+                else {
+                    if (e3 !== k) {
+                        d++;
+                    }
+                }
+
+                if (d < g || h < g) {
+                    g = (d > h ? h + 1 : d + 1);
+                }
+                else {
+                    if (e4 !== k) {
+                        g++;
+                    }
+                }
+                p[y] = h = g;
+                g = d;
+                d = b;
+                b = c;
+                c = a;
+            }
+        }
+
+        for (; x < m;) {
+            var e = t.charCodeAt(x);
+            c = x;
+            d = ++x;
+            for (y = 0; y < n; y++) {
+                a = p[y];
+                if (a < c || d < c) {
+                    d = (a > d ? d + 1 : a + 1);
+                }
+                else {
+                    if (e !== s.charCodeAt(y)) {
+                        d = c + 1;
+                    }
+                    else {
+                        d = c;
+                    }
+                }
+                p[y] = d;
+                c = a;
+            }
+            h = d;
+        }
+        return h;
     }
 
-    console.log(passwordData);
+    // function runTSne() {
+    //
+    //     testSNE = [];
+    //     // initialize data. Here we have 3 points and some example pairwise dissimilarities
+    //     var dists = [[10, 5], [5, 10]];
+    //     console.log(dists);
+    //     tsne.initDataDist(dists);
+    //
+    //     for(var k = 0; k < 500; k++) {
+    //       tsne.step(); // every time you call this, solution gets better
+    //     }
+    //
+    //     var Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
+    //     console.log(Y, " What is this");
+    //     // console.log(storeX);
+    //     // console.log(testSNE);
+    //
+    // }
+    //
+    // function runPCA() {
+    //
+    // }
+    // var data = [[40,50,60],[50,70,60],[80,70,90],[50,60,80]];
+    // function runPCA() {
+    //
+    //     console.log("Array right before vectors", combineXY);
+    //     var vectors = PCA.getEigenVectors(combineXY);
+    //     console.log(vectors);
+    //     // var first = PCA.computePercentageExplained(vectors,vectors[0])
+    //     //
+    //     // var topTwo = PCA.computePercentageExplained(vectors,vectors[0],vectors[1])
+    //
+    //     var adData = PCA.computeAdjustedData(combineXY,vectors[0])
+    //     console.log("data", adData);
+    //     // console.log();
+    //     locationData = [];
+    //     for (var i = 0; i < adData.adjustedData[0].length; i++){
+    //         locationData.push(adData.adjustedData[0][i]);
+    //     }
+    //     console.log("Data after PCA", locationData);
+    //     update();
+    // }
+
     getPassword();
     svgExample();
 
