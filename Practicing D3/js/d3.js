@@ -5,16 +5,8 @@ $( document ).ready(function() {
     var created = false;
     var locationData = [];
     var allPasswords = passwordData.allPasswords
-    var canvasSize = 400;
-    var outerCircleSize = canvasSize/2;
-    var halfData = 0;
-    //
-    // var storeX = [];
-    // var storeY = [];
-    // var combineXY = [];
-    //
-    // var testSNE = [];
-
+    var canvasSize = 800;
+    var middleSection = canvasSize/2;
     var text = "";
 
     // SNE test
@@ -26,46 +18,28 @@ $( document ).ready(function() {
 
 
 
-    function svgExample() {
+    function createContainer() {
             canvas = d3.select(".container")
             .append("svg")
             .attr("width", canvasSize)
             .attr("height", canvasSize);
 
-        var circle = canvas.append("circle")
-            .attr("cx", outerCircleSize)
-            .attr("cy", outerCircleSize)
-            .attr("r", outerCircleSize)
-            .attr("fill", "orange");
-
         updatePassCircles();
     }
-    //
-    //     var line = canvas.append("line")
-    //         .attr("x1", 100)
-    //         .attr("x2", 100)
-    //         .attr("y1", 100)
-    //         .attr("y2", 200)
-    //         .attr("stroke", "grey")
-    //         .attr("stroke-width", 2)
-    //
-
 
     function updatePassCircles() {
-        // storeX = [];
-        // storeY = [];
-        // combineXY = [];
-
+        // Check to remove/add new dots and text
         if (created) {
             $(".passCircle").remove();
             $(".displayPass").remove();
         }
 
+        var getY = [];
         if ($(".password").val().length != 0 ) {
             text = canvas.append("text")
                 .attr("class", "displayPass")
-                .attr("x", outerCircleSize)
-                .attr("y", outerCircleSize)
+                .attr("x", middleSection)
+                .attr("y", middleSection)
                 .text($(".password").val());
             // Center the text, text-anchor is the property
             text.style("text-anchor", "middle")
@@ -79,28 +53,24 @@ $( document ).ready(function() {
                     .attr("fill", "blue")
                     .attr("class", (d) => d ?  '' + d[0] + '' + '  passCircle' + '': "")
                     .attr("cx", function(d) {
-                        // Half distance for X and scale up
-                        halfData = (d[1]/2) * 3;
-                        // Pick true or false to plot on a random section of the circle
-                        var random_boolean = Math.random() >= 0.5;
-                        if (random_boolean) {
-                            var x = outerCircleSize + halfData;
-                        } else {
-                            var x = outerCircleSize - halfData;
-                        }
-                        return x;
+
+
+
+                        var min = -200;
+                        var max = 200;
+
+                        var getX = (Math.floor(Math.random() * (max - min + 1)) + min) + middleSection
+
+                        console.log(getX);
+                        // console.log(getX);
+                        // https://www.mathopenref.com/coordbasiccircle.html
+                        // https://www.maplesoft.com/support/help/maple/view.aspx?path=MathApps%2FStandardEquationofaCircle
+                        getY.push(getX - d[1]);
+                        // console.log(getY);
+                        return getX;
                     })
                     .attr("cy", function (d, i) {
-                        // Half distance for X and scale up
-                        halfData = (d[1]/2) * 3;
-                        // Pick true or false to plot on a random section of the circle
-                        var random_boolean = Math.random() >= 0.5;
-                        if (random_boolean) {
-                            var y = outerCircleSize + halfData;
-                        } else {
-                            var y = outerCircleSize - halfData;
-                        }
-                        return y;
+                        return getY[i];
                     })
                     // Radius will be just 5 for now
                     .attr ("r", function (d) {
@@ -108,6 +78,7 @@ $( document ).ready(function() {
                     })
                     created = true;
             }
+            // console.log(getY);
     }
 
     function getPassword() {
@@ -268,6 +239,6 @@ $( document ).ready(function() {
     // }
 
     getPassword();
-    svgExample();
+    createContainer();
 
 });
