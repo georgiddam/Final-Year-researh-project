@@ -9,6 +9,7 @@ $( document ).ready(function() {
     var middleSection = canvasSize/2;
     var text = "";
 
+
     // SNE test
     var opt = {}
     opt.epsilon = 10; // epsilon is learning rate (10 = default)
@@ -17,14 +18,20 @@ $( document ).ready(function() {
     var tsne = new tsnejs.tSNE(opt); // create a tSNE instance
 
 
+    function comparator(a, b) {
+      if (a[1] < b[1]) return -1;
+      if (a[1] > b[1]) return 1;
+      return 0;
+    }
+
 
     function createContainer() {
-            canvas = d3.select(".container")
-            .append("svg")
-            .attr("width", canvasSize)
-            .attr("height", canvasSize);
+        canvas = d3.select(".container")
+        .append("svg")
+        .attr("width", canvasSize)
+        .attr("height", canvasSize);
 
-        updatePassCircles();
+
     }
 
     function updatePassCircles() {
@@ -47,6 +54,7 @@ $( document ).ready(function() {
             // Put the password circles in the canvas
             var passwords = canvas.selectAll("circle")
                 // [0] are names and [1] are distances
+
                 .data(locationData)
                 .enter()
                     .append("circle")
@@ -61,7 +69,7 @@ $( document ).ready(function() {
 
                         var getX = (Math.floor(Math.random() * (max - min + 1)) + min) + middleSection
 
-                        console.log(getX);
+                        // console.log(getX);
                         // console.log(getX);
                         // https://www.mathopenref.com/coordbasiccircle.html
                         // https://www.maplesoft.com/support/help/maple/view.aspx?path=MathApps%2FStandardEquationofaCircle
@@ -90,11 +98,16 @@ $( document ).ready(function() {
               locationData.push([allPasswords[i].password, lDistance]);
               // console.log(lDistance);
           }
+          // console.log(locationData, "data");
+          // var sortedArray = ;
+          console.log(locationData.sort(comparator));
+          // console.log(sortedArray);
           updatePassCircles();
           // runPCA();
           // runTSne();
           // console.log(locationData);
         });
+
     }
 
 
@@ -194,50 +207,6 @@ $( document ).ready(function() {
         }
         return h;
     }
-
-    // function runTSne() {
-    //
-    //     testSNE = [];
-    //     // initialize data. Here we have 3 points and some example pairwise dissimilarities
-    //     var dists = [[10, 5], [5, 10]];
-    //     console.log(dists);
-    //     tsne.initDataDist(dists);
-    //
-    //     for(var k = 0; k < 500; k++) {
-    //       tsne.step(); // every time you call this, solution gets better
-    //     }
-    //
-    //     var Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
-    //     console.log(Y, " What is this");
-    //     // console.log(storeX);
-    //     // console.log(testSNE);
-    //
-    // }
-    //
-    // function runPCA() {
-    //
-    // }
-    // var data = [[40,50,60],[50,70,60],[80,70,90],[50,60,80]];
-    // function runPCA() {
-    //
-    //     console.log("Array right before vectors", combineXY);
-    //     var vectors = PCA.getEigenVectors(combineXY);
-    //     console.log(vectors);
-    //     // var first = PCA.computePercentageExplained(vectors,vectors[0])
-    //     //
-    //     // var topTwo = PCA.computePercentageExplained(vectors,vectors[0],vectors[1])
-    //
-    //     var adData = PCA.computeAdjustedData(combineXY,vectors[0])
-    //     console.log("data", adData);
-    //     // console.log();
-    //     locationData = [];
-    //     for (var i = 0; i < adData.adjustedData[0].length; i++){
-    //         locationData.push(adData.adjustedData[0][i]);
-    //     }
-    //     console.log("Data after PCA", locationData);
-    //     update();
-    // }
-
     getPassword();
     createContainer();
 
