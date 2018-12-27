@@ -8,6 +8,7 @@ $( document ).ready(function() {
     var canvasSize = 800;
     var middleSection = canvasSize/2;
     var text = "";
+    var coordinates = [];
 
 
     // SNE test
@@ -24,6 +25,30 @@ $( document ).ready(function() {
       return 0;
     }
 
+    function getTheta() {
+        var longest = 0
+        coordinates = [];
+        // console.log("Get Theta strt");
+        for(var i = 0; i<locationData.length; i++) {
+            var item = [];
+            var currentLength = allPasswords[i].password.length;
+            if (longest < currentLength) {
+                longest = currentLength
+            }
+            // console.log(locationData[i][1]);
+            var radius = locationData[i][1];
+            var radian = ((Math.PI * 2) * (currentLength-1)) / longest;
+            var getY = Math.sin(radian)*radius;
+            var getX = Math.cos(radian)*radius;
+            item.push(getY, getX);
+            coordinates.push(item);
+            // console.log("This is Y", getY);
+            // console.log("This is X", getX);
+
+        }
+        updatePassCircles();
+        console.log(coordinates);
+    }
 
     function createContainer() {
         canvas = d3.select(".container")
@@ -55,30 +80,16 @@ $( document ).ready(function() {
             var passwords = canvas.selectAll("circle")
                 // [0] are names and [1] are distances
 
-                .data(locationData)
+                .data(coordinates)
                 .enter()
                     .append("circle")
                     .attr("fill", "blue")
-                    .attr("class", (d) => d ?  '' + d[0] + '' + '  passCircle' + '': "")
+                    .attr("class", "passCircle")
                     .attr("cx", function(d) {
-
-
-
-                        var min = -200;
-                        var max = 200;
-
-                        var getX = (Math.floor(Math.random() * (max - min + 1)) + min) + middleSection
-
-                        // console.log(getX);
-                        // console.log(getX);
-                        // https://www.mathopenref.com/coordbasiccircle.html
-                        // https://www.maplesoft.com/support/help/maple/view.aspx?path=MathApps%2FStandardEquationofaCircle
-                        getY.push(getX - d[1]);
-                        // console.log(getY);
-                        return getX;
+                        return (d[1]+middleSection);
                     })
                     .attr("cy", function (d, i) {
-                        return getY[i];
+                        return (d[0]+middleSection);
                     })
                     // Radius will be just 5 for now
                     .attr ("r", function (d) {
@@ -100,9 +111,11 @@ $( document ).ready(function() {
           }
           // console.log(locationData, "data");
           // var sortedArray = ;
-          console.log(locationData.sort(comparator));
+          locationData.sort(comparator);
+          getTheta();
+
           // console.log(sortedArray);
-          updatePassCircles();
+          // updatePassCircles();
           // runPCA();
           // runTSne();
           // console.log(locationData);
@@ -211,3 +224,7 @@ $( document ).ready(function() {
     createContainer();
 
 });
+
+
+        // https://www.mathopenref.com/coordbasiccircle.html
+        // https://www.maplesoft.com/support/help/maple/view.aspx?path=MathApps%2FStandardEquationofaCircle
