@@ -26,18 +26,33 @@ $( document ).ready(function() {
     }
 
     function getTheta() {
-        var longest = 0
+        var longest = allPasswords[0].password.length;
+        var minDistance = locationData[0][1];
+        var maxDistance = locationData[0][1];
         coordinates = [];
         // console.log("Get Theta strt");
-        for(var i = 0; i<locationData.length; i++) {
-            var item = [];
+        for (var i = 1; i<locationData.length; i++) {
             var currentLength = allPasswords[i].password.length;
             if (longest < currentLength) {
                 longest = currentLength
             }
+            if(locationData[i][1] > maxDistance) {
+                maxDistance = locationData[i][1];
+            }
+            if(locationData[i][1] < minDistance) {
+                minDistance = locationData[i][1];
+            }
+        }
+        var minRadius = 10;
+        var maxRadius = 100;
+        for(var i = 0; i<locationData.length; i++) {
+            var currentLength = allPasswords[i].password.length;
+            var item = [];
+
             // console.log(locationData[i][1]);
-            var radius = locationData[i][1];
+            var radius = ((locationData[i][1] - minDistance) / (maxDistance-minDistance)) * (maxRadius - minRadius) + minDistance;
             var radian = ((Math.PI * 2) * (currentLength-1)) / longest;
+            console.log("Angle: "+currentLength+"  "+longest+"  "+radian);
             var getY = Math.sin(radian)*radius;
             var getX = Math.cos(radian)*radius;
             item.push(getY, getX);
