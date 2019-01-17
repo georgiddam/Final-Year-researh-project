@@ -5,7 +5,7 @@ $( document ).ready(function() {
     var created = false;
     var locationData = [];
     var allPasswords = passwordData.allPasswords
-    var canvasSize = 800;
+    var canvasSize = 850;
     var middleSection = canvasSize/2;
     var text = "";
 

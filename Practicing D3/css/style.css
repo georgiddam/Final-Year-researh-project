@@ -1,46 +1,22 @@
-/* svg line {
-  -webkit-animation: rotating 2s linear infinite;
-  -moz-animation: rotating 2s linear infinite;
-  -ms-animation: rotating 2s linear infinite;
-  -o-animation: rotating 2s linear infinite;
-  animation: rotating 2s linear infinite;
-  transform-origin: center center;
-} */
-
 .container {
-  display: inline-block;
-
+    position: relative;
+    left: 20%;
+    float: left;
 }
-/* svg {
-    border: 1px solid black;
-    border-radius: 50%;
-} */
 
-/* @-webkit-keyframes rotating {
-  from {
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -webkit-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+.container > svg {
+    overflow: visible;
 }
-@keyframes rotating {
-    from {
-        -ms-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    to {
-        -ms-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        transform: rotate(360deg);
-    } */
+
+.pass-data {
+    /* float: right; */
+    position: fixed;
+    right: 0px;
+    padding: 140px;
+    width: 300px;
+    height: 800px;
+}
+
+.clear {
+    clear: both;
 }
