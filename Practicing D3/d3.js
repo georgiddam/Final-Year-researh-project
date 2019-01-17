@@ -8,15 +8,8 @@ $( document ).ready(function() {
     var canvasSize = 800;
     var middleSection = canvasSize/2;
     var text = "";
-    var coordinates = [];
 
-
-    // SNE test
-    var opt = {}
-    opt.epsilon = 10; // epsilon is learning rate (10 = default)
-    opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
-    opt.dim = 2; // dimensionality of the embedding (2 = default)
-    var tsne = new tsnejs.tSNE(opt); // create a tSNE instance
+    // var fastLevenshtein = require('fast-levenshtein');
 
 
     function comparator(a, b) {
@@ -29,8 +22,7 @@ $( document ).ready(function() {
         var longest = allPasswords[0].password.length;
         var minDistance = locationData[0][1];
         var maxDistance = locationData[0][1];
-        coordinates = [];
-        // console.log("Get Theta strt");
+        finalData = [];
         for (var i = 1; i<locationData.length; i++) {
             var currentLength = allPasswords[i].password.length;
             if (longest < currentLength) {
@@ -44,25 +36,19 @@ $( document ).ready(function() {
             }
         }
         var minRadius = 10;
-        var maxRadius = 100;
+        var maxRadius = 500;
         for(var i = 0; i<locationData.length; i++) {
+            // console.log();
             var currentLength = allPasswords[i].password.length;
             var item = [];
-
-            // console.log(locationData[i][1]);
             var radius = ((locationData[i][1] - minDistance) / (maxDistance-minDistance)) * (maxRadius - minRadius) + minDistance;
             var radian = ((Math.PI * 2) * (currentLength-1)) / longest;
-            console.log("Angle: "+currentLength+"  "+longest+"  "+radian);
             var getY = Math.sin(radian)*radius;
             var getX = Math.cos(radian)*radius;
-            item.push(getY, getX);
-            coordinates.push(item);
-            // console.log("This is Y", getY);
-            // console.log("This is X", getX);
-
+            item.push(getY, getX, radius, allPasswords[i].password,locationData[i][1]);
+            finalData.push(item);
         }
         updatePassCircles();
-        console.log(coordinates);
     }
 
     function createContainer() {
@@ -75,14 +61,15 @@ $( document ).ready(function() {
     }
 
     function updatePassCircles() {
+
         // Check to remove/add new dots and text
         if (created) {
             $(".passCircle").remove();
             $(".displayPass").remove();
         }
-
         var getY = [];
         if ($(".password").val().length != 0 ) {
+
             text = canvas.append("text")
                 .attr("class", "displayPass")
                 .attr("x", middleSection)
@@ -92,13 +79,33 @@ $( document ).ready(function() {
             text.style("text-anchor", "middle")
 
             // Put the password circles in the canvas
-            var passwords = canvas.selectAll("circle")
-                // [0] are names and [1] are distances
 
-                .data(coordinates)
+                var unhashedPasswordCircles = canvas.selectAll("circle")
+
+                // [0] are names and [1] are distances
+                .data(finalData)
                 .enter()
                     .append("circle")
-                    .attr("fill", "blue")
+                    .on('click', function(d) {
+                        console.log(d);
+                    })
+                    .attr("fill", function (d) {
+                        var intColor = d[2];
+                        hexString = intColor.toString(16);
+                        if (hexString.length % 2) {
+                            hexString = '0' + hexString;
+                        }
+
+                        if (hexString.length == 2){
+                            hexString = hexString + hexString + hexString;
+                        } else if (hexString.length == 4) {
+                            hexString = hexString + hexString.substring(0,2);
+                        } else if (hexString.length > 6) {
+                            hexString.substring(0,6);
+                        }
+                        hexString = "#" + hexString;
+                        return hexString;
+                    })
                     .attr("class", "passCircle")
                     .attr("cx", function(d) {
                         return (d[1]+middleSection);
@@ -111,37 +118,43 @@ $( document ).ready(function() {
                         return 5;
                     })
                     created = true;
-            }
-            // console.log(getY);
+            // console.log("reaches");
+            // unhashedPasswordCircles.
+        }
+    }
+
+    function delay(callback, ms) {
+        var timer = 0;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback.apply(context, args);
+            }, ms || 0);
+        };
     }
 
     function getPassword() {
-        $( ".password" ).keyup(function() {
-          length = $(".password").val().length;
-          locationData = [];
-          for (var i = 0; i<allPasswords.length; i++){
-              var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
-              locationData.push([allPasswords[i].password, lDistance]);
-              // console.log(lDistance);
-          }
-          // console.log(locationData, "data");
-          // var sortedArray = ;
-          locationData.sort(comparator);
-          getTheta();
-
-          // console.log(sortedArray);
-          // updatePassCircles();
-          // runPCA();
-          // runTSne();
-          // console.log(locationData);
-        });
-
+        $( ".password" ).keyup(delay(function(e) {
+            length = $(".password").val().length;
+            locationData = [];
+            var passLength = allPasswords.length
+            for (var i = 0; i< passLength; i++) {
+                var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
+                locationData.push([allPasswords[i].password, lDistance]);
+            }
+            locationData.sort(comparator);
+            getTheta();
+        }, 1000));
     }
 
 
     // https://stackoverflow.com/questions/18516942/fastest-general-purpose-levenshtein-javascript-implementation
     // Took code from here
     function levenshtein(s, t) {
+        //
+        // var distance = fastLevenshtein.get(s, t)
+        // return distance;
         if (s === t) {
             return 0;
         }
@@ -234,6 +247,8 @@ $( document ).ready(function() {
             h = d;
         }
         return h;
+
+
     }
     getPassword();
     createContainer();
