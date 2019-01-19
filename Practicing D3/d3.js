@@ -1,12 +1,16 @@
 $( document ).ready(function() {
     // PCA (global);
     var length = 0;
-    var canvas = null;
+    // var canvas = null;
     var created = false;
     var locationData = [];
     var allPasswords = passwordData.allPasswords
-    var canvasSize = 850;
-    var middleSection = canvasSize/2;
+    var canvasSizeWidth = 850;
+    var canvasSizeHeight = 850;
+
+    var middleSectionX = canvasSizeWidth/2;
+    var middleSectionY = canvasSizeHeight/2;
+    var canvas = d3.select(".container").append("svg")
     var text = "";
 
     // var fastLevenshtein = require('fast-levenshtein');
@@ -18,7 +22,7 @@ $( document ).ready(function() {
       return 0;
     }
 
-    function getTheta() {
+    function formulateData() {
         var longest = allPasswords[0].password.length;
         var minDistance = locationData[0][1];
         var maxDistance = locationData[0][1];
@@ -52,15 +56,17 @@ $( document ).ready(function() {
     }
 
     function createContainer() {
-        canvas = d3.select(".container")
-        .append("svg")
-        .attr("width", canvasSize)
-        .attr("height", canvasSize);
-
-
+        console.log("Creating Container");
+        canvas
+            .attr("width", canvasSizeWidth)
+            .attr("height", canvasSizeHeight);
     }
 
+    function resizeContainer() {
+        $(".container").width(1200)
+    }
     function updatePassCircles() {
+        resizeContainer();
 
         // Check to remove/add new dots and text
         if (created) {
@@ -72,8 +78,8 @@ $( document ).ready(function() {
 
             text = canvas.append("text")
                 .attr("class", "displayPass")
-                .attr("x", middleSection)
-                .attr("y", middleSection)
+                .attr("x", middleSectionX)
+                .attr("y", middleSectionY)
                 .text($(".password").val());
             // Center the text, text-anchor is the property
             text.style("text-anchor", "middle")
@@ -87,7 +93,8 @@ $( document ).ready(function() {
                 .enter()
                     .append("circle")
                     .on('click', function(d) {
-                        console.log(d);
+
+                        displayData(d);
                     })
                     .attr("fill", function (d) {
                         var intColor = d[2];
@@ -108,10 +115,10 @@ $( document ).ready(function() {
                     })
                     .attr("class", "passCircle")
                     .attr("cx", function(d) {
-                        return (d[1]+middleSection);
+                        return (d[1]+middleSectionX);
                     })
                     .attr("cy", function (d, i) {
-                        return (d[0]+middleSection);
+                        return (d[0]+middleSectionY);
                     })
                     // Radius will be just 5 for now
                     .attr ("r", function (d) {
@@ -121,6 +128,15 @@ $( document ).ready(function() {
             // console.log("reaches");
             // unhashedPasswordCircles.
         }
+    }
+
+    function displayData(circle) {
+        console.log(circle);
+        if ($(".circleData")[0]){
+            $(".circleData").remove();
+        }
+        $(".pass-data").append( '<div class="circleData"> Unhashed Password : ' + circle[3] + '</div>');
+        $(".pass-data").append( '<div class="circleData"> Distance from Tested : ' + circle[4] + '</div>');
     }
 
     function delay(callback, ms) {
@@ -144,7 +160,7 @@ $( document ).ready(function() {
                 locationData.push([allPasswords[i].password, lDistance]);
             }
             locationData.sort(comparator);
-            getTheta();
+            formulateData();
         }, 1000));
     }
 

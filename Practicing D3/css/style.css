@@ -1,22 +1,40 @@
+* {
+    border: 1px solid black;
+}
 .container {
-    position: relative;
-    left: 20%;
-    float: left;
+    position: absolute;
 }
 
 .container > svg {
+    /* float: right; */
+    /* display: inline-table; */
+    position: absolute;
     overflow: visible;
+    left: 50%;
+    transform: translate(-50%, 0);
 }
 
+
 .pass-data {
-    /* float: right; */
-    position: fixed;
-    right: 0px;
-    padding: 140px;
-    width: 300px;
-    height: 800px;
+    padding: 5px 0;
+    top: 50%;
+    position: absolute;
+    padding-left: 20px;
+    width: auto;
+    height: auto;
+    transform: translate(0, 50%);
 }
 
 .clear {
     clear: both;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                      supported by Chrome and Opera */
 }
