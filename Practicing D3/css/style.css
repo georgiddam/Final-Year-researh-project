@@ -1,5 +1,9 @@
-* {
+/* * {
     border: 1px solid black;
+} */
+
+.vortexed {
+    fill: red !important;
 }
 .container {
     position: absolute;
@@ -8,9 +12,6 @@
 }
 
 .container > svg {
-    /* float: right; */
-    /* display: inline-table; */
-
     position: absolute;
     overflow: visible;
     left: 50%;

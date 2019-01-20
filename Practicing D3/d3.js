@@ -1,8 +1,4 @@
 $( document ).ready(function() {
-    // PCA (global);
-    // var length = 0;
-    // var canvas = null;
-    // var created = false;
     var passwordLD = [];
     var allPasswords = passwordData.allPasswords
     var canvasSizeWidth = 850;
@@ -16,8 +12,8 @@ $( document ).ready(function() {
 
     var resizeContainerHeight = 0;
     var resizeContainerWidth = 0;
-    // var fastLevenshtein = require('fast-levenshtein');
 
+    // const fastLevenshtein = require('js-levenshtein');
 
     function comparator(a, b) {
       if (a[1] < b[1]) return -1;
@@ -55,7 +51,7 @@ $( document ).ready(function() {
             var getY = Math.sin(radian)*radius;
             if (getY < 0) {
                 var temp = canvasSizeHeight + -(getY);
-                console.log(temp, canvasSizeHeight, getY);
+                // console.log(temp, canvasSizeHeight, getY);
 
             } else if (getY > middleSectionY ) {
                 var temp = canvasSizeHeight + (getY);
@@ -64,12 +60,12 @@ $( document ).ready(function() {
             if (resizeContainerHeight < temp) {
                 resizeContainerHeight = temp;
             }
-            console.log("Highest height = " + resizeContainerHeight);
+            // console.log("Highest height = " + resizeContainerHeight);
             var getX = Math.cos(radian)*radius;
 
             if (getX < 0) {
                 var temp = canvasSizeWidth + -(getX);
-                console.log(temp, canvasSizeWidth, getX);
+                // console.log(temp, canvasSizeWidth, getX);
 
             } else if (getX > middleSectionX ) {
                 var temp = canvasSizeWidth + (getX);
@@ -78,14 +74,14 @@ $( document ).ready(function() {
             if (resizeContainerWidth < temp) {
                 resizeContainerWidth = temp;
             }
-            item.push(getY, getX, radius, allPasswords[i].password,passwordLD[i][1]);
+            item.push(getY, getX, radius, passwordLD[i][0],passwordLD[i][1]);
             finalData.push(item);
         }
         updatePassCircles();
     }
 
     function createContainer() {
-        console.log("Creating Container");
+        // console.log("Creating Container");
         canvas
             .attr("width", canvasSizeWidth)
             .attr("height", canvasSizeHeight);
@@ -153,12 +149,12 @@ $( document ).ready(function() {
     }
 
     function displayData(circle) {
-        console.log(circle);
-        if ($(".circleData")[0]){
-            $(".circleData").remove();
-        }
-        $(".pass-data").append( '<div class="circleData"> Unhashed Password : ' + circle[3] + '</div>');
-        $(".pass-data").append( '<div class="circleData"> Distance from Tested : ' + circle[4] + '</div>');
+    //     // console.log(circle);
+    //     if ($(".circleData")[0]){
+    //         $(".circleData").remove();
+    //     }
+    //     $(".pass-data").append( '<div class="circleData"> Unhashed Password : ' + circle[3] + '</div>');
+    //     $(".pass-data").append( '<div class="circleData"> Distance from Tested : ' + circle[4] + '</div>');
     }
 
     function delay(callback, ms) {
@@ -190,8 +186,8 @@ $( document ).ready(function() {
     // https://stackoverflow.com/questions/18516942/fastest-general-purpose-levenshtein-javascript-implementation
     // Took code from here
     function levenshtein(s, t) {
-        //
-        // var distance = fastLevenshtein.get(s, t)
+
+        // var distance = fastLevenshtein(s, t)
         // return distance;
         if (s === t) {
             return 0;
