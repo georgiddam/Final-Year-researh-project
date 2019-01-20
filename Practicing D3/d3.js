@@ -1,9 +1,9 @@
 $( document ).ready(function() {
     // PCA (global);
-    var length = 0;
+    // var length = 0;
     // var canvas = null;
-    var created = false;
-    var locationData = [];
+    // var created = false;
+    var passwordLD = [];
     var allPasswords = passwordData.allPasswords
     var canvasSizeWidth = 850;
     var canvasSizeHeight = 850;
@@ -13,6 +13,9 @@ $( document ).ready(function() {
     var canvas = d3.select(".container").append("svg")
     var text = "";
 
+
+    var resizeContainerHeight = 0;
+    var resizeContainerWidth = 0;
     // var fastLevenshtein = require('fast-levenshtein');
 
 
@@ -23,33 +26,59 @@ $( document ).ready(function() {
     }
 
     function formulateData() {
+        resizeContainerHeight = 0;
+        resizeContainerWidth = 0;
         var longest = allPasswords[0].password.length;
-        var minDistance = locationData[0][1];
-        var maxDistance = locationData[0][1];
+        var minDistance = passwordLD[0][1];
+        var maxDistance = passwordLD[0][1];
         finalData = [];
-        for (var i = 1; i<locationData.length; i++) {
+        for (var i = 1; i<passwordLD.length; i++) {
             var currentLength = allPasswords[i].password.length;
             if (longest < currentLength) {
                 longest = currentLength
             }
-            if(locationData[i][1] > maxDistance) {
-                maxDistance = locationData[i][1];
+            if(passwordLD[i][1] > maxDistance) {
+                maxDistance = passwordLD[i][1];
             }
-            if(locationData[i][1] < minDistance) {
-                minDistance = locationData[i][1];
+            if(passwordLD[i][1] < minDistance) {
+                minDistance = passwordLD[i][1];
             }
         }
         var minRadius = 10;
         var maxRadius = 500;
-        for(var i = 0; i<locationData.length; i++) {
+        for(var i = 0; i<passwordLD.length; i++) {
             // console.log();
             var currentLength = allPasswords[i].password.length;
             var item = [];
-            var radius = ((locationData[i][1] - minDistance) / (maxDistance-minDistance)) * (maxRadius - minRadius) + minDistance;
+            var radius = ((passwordLD[i][1] - minDistance) / (maxDistance-minDistance)) * (maxRadius - minRadius) + minDistance;
             var radian = ((Math.PI * 2) * (currentLength-1)) / longest;
             var getY = Math.sin(radian)*radius;
+            if (getY < 0) {
+                var temp = canvasSizeHeight + -(getY);
+                console.log(temp, canvasSizeHeight, getY);
+
+            } else if (getY > middleSectionY ) {
+                var temp = canvasSizeHeight + (getY);
+            }
+
+            if (resizeContainerHeight < temp) {
+                resizeContainerHeight = temp;
+            }
+            console.log("Highest height = " + resizeContainerHeight);
             var getX = Math.cos(radian)*radius;
-            item.push(getY, getX, radius, allPasswords[i].password,locationData[i][1]);
+
+            if (getX < 0) {
+                var temp = canvasSizeWidth + -(getX);
+                console.log(temp, canvasSizeWidth, getX);
+
+            } else if (getX > middleSectionX ) {
+                var temp = canvasSizeWidth + (getX);
+            }
+
+            if (resizeContainerWidth < temp) {
+                resizeContainerWidth = temp;
+            }
+            item.push(getY, getX, radius, allPasswords[i].password,passwordLD[i][1]);
             finalData.push(item);
         }
         updatePassCircles();
@@ -63,70 +92,63 @@ $( document ).ready(function() {
     }
 
     function resizeContainer() {
-        $(".container").width(1200)
+        $(".container").width(resizeContainerWidth)
+        $(".container").height(resizeContainerHeight)
     }
+
+    function resetCircle () {
+        if ($(".passCircle")[0]) {
+            $(".passCircle").remove();
+        }
+    }
+
     function updatePassCircles() {
         resizeContainer();
+        resetCircle();
+        passValue = $(".password").val();
 
-        // Check to remove/add new dots and text
-        if (created) {
-            $(".passCircle").remove();
-            $(".displayPass").remove();
-        }
-        var getY = [];
-        if ($(".password").val().length != 0 ) {
+        if (passValue.length != 0 && passValue.trim() != 0 ) {
+            // [0] are names and [1] are distances
+        canvas.selectAll("circle")
+            .data(finalData)
+            .enter()
+                .append("circle")
+                .on('click', function(d) {
+                    displayData(d);
+                })
 
-            text = canvas.append("text")
-                .attr("class", "displayPass")
-                .attr("x", middleSectionX)
-                .attr("y", middleSectionY)
-                .text($(".password").val());
-            // Center the text, text-anchor is the property
-            text.style("text-anchor", "middle")
+                .attr("fill", function (d) {
+                    var intColor = d[2];
+                    hexString = intColor.toString(16);
+                    hexString = hexString.replace(".", "");
+                    if (hexString.length % 2) {
+                        hexString = '0' + hexString;
+                    }
 
-            // Put the password circles in the canvas
+                    if (hexString.length == 2){
+                        hexString = hexString + hexString + hexString;
+                    } else if (hexString.length == 4) {
+                        hexString = hexString + hexString.substring(0,2);
+                    } else if (hexString.length > 6) {
+                        hexString.substring(0,6);
+                    }
+                    hexString = "#" + hexString;
+                    return hexString;
+                })
 
-                var unhashedPasswordCircles = canvas.selectAll("circle")
+                .attr("class", "passCircle")
+                .attr("cx", function(d) {
+                    return (d[1]+middleSectionX);
+                })
 
-                // [0] are names and [1] are distances
-                .data(finalData)
-                .enter()
-                    .append("circle")
-                    .on('click', function(d) {
+                .attr("cy", function (d, i) {
+                    return (d[0]+middleSectionY);
+                })
 
-                        displayData(d);
-                    })
-                    .attr("fill", function (d) {
-                        var intColor = d[2];
-                        hexString = intColor.toString(16);
-                        if (hexString.length % 2) {
-                            hexString = '0' + hexString;
-                        }
-
-                        if (hexString.length == 2){
-                            hexString = hexString + hexString + hexString;
-                        } else if (hexString.length == 4) {
-                            hexString = hexString + hexString.substring(0,2);
-                        } else if (hexString.length > 6) {
-                            hexString.substring(0,6);
-                        }
-                        hexString = "#" + hexString;
-                        return hexString;
-                    })
-                    .attr("class", "passCircle")
-                    .attr("cx", function(d) {
-                        return (d[1]+middleSectionX);
-                    })
-                    .attr("cy", function (d, i) {
-                        return (d[0]+middleSectionY);
-                    })
-                    // Radius will be just 5 for now
-                    .attr ("r", function (d) {
-                        return 5;
-                    })
-                    created = true;
-            // console.log("reaches");
-            // unhashedPasswordCircles.
+                // Radius will be just 5 for now
+                .attr ("r", function (d) {
+                    return 5;
+                })
         }
     }
 
@@ -152,14 +174,14 @@ $( document ).ready(function() {
 
     function getPassword() {
         $( ".password" ).keyup(delay(function(e) {
-            length = $(".password").val().length;
-            locationData = [];
+            // length = $(".password").val().length;
+            passwordLD = [];
             var passLength = allPasswords.length
             for (var i = 0; i< passLength; i++) {
                 var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
-                locationData.push([allPasswords[i].password, lDistance]);
+                passwordLD.push([allPasswords[i].password, lDistance]);
             }
-            locationData.sort(comparator);
+            passwordLD.sort(comparator);
             formulateData();
         }, 1000));
     }
