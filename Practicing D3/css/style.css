@@ -22,12 +22,11 @@
 
 .pass-data {
     padding: 5px 0;
-    top: 50%;
+    top: 25%;
     position: absolute;
     padding-left: 20px;
     width: auto;
     height: auto;
-    transform: translate(0, 50%);
 }
 
 .clear {
