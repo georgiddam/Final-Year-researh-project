@@ -114,22 +114,8 @@ $( document ).ready(function() {
                 })
 
                 .attr("fill", function (d) {
-                    var intColor = d[2];
-                    hexString = intColor.toString(16);
-                    hexString = hexString.replace(".", "");
-                    if (hexString.length % 2) {
-                        hexString = '0' + hexString;
-                    }
 
-                    if (hexString.length == 2){
-                        hexString = hexString + hexString + hexString;
-                    } else if (hexString.length == 4) {
-                        hexString = hexString + hexString.substring(0,2);
-                    } else if (hexString.length > 6) {
-                        hexString.substring(0,6);
-                    }
-                    hexString = "#" + hexString;
-                    return hexString;
+                    return changeColor(d);
                 })
 
                 .attr("class", "passCircle")
@@ -146,6 +132,64 @@ $( document ).ready(function() {
                     return 5;
                 })
         }
+    }
+
+    function changeColor(d) {
+        var hexString;
+        radius = d[4];
+        stripSingleDigit = 0;
+
+        if(radius > 10 ) {
+            stripSingleDigit = radius.toString().substring(1,2);
+        }
+
+        if(stripSingleDigit == "0") {
+            stripSingleDigit = "00";
+        } else {
+            stripSingleDigit = stripSingleDigit*10;
+            console.log(stripSingleDigit);
+        }
+
+        switch (true) {
+            case (radius < 10) :
+                hexString = "#00FF" + (radius*10);
+                break;
+            case (radius < 20):
+                hexString = "#0080" + stripSingleDigit;
+                break;
+            case (radius < 30):
+                hexString = "#0000" + stripSingleDigit;
+                break;
+            case (radius < 40):
+                hexString = "#00FF" + stripSingleDigit;
+                break;
+            case (radius < 50):
+                hexString = "#0080" + stripSingleDigit;
+                break;
+            case (radius < 60):
+                hexString = "#8080" + stripSingleDigit;
+                break;
+            default:
+                hexString = "#000000";
+        }
+        // console.log(hexString);
+
+        // var intColor = d[2];
+        // hexString = intColor.toString(16);
+        // hexString = hexString.replace(".", "");
+        // if (hexString.length % 2) {
+        //     hexString = '0' + hexString;
+        // }
+
+        // if (hexString.length == 2){
+        //     hexString = hexString + hexString + hexString;
+        // } else if (hexString.length == 4) {
+        //     hexString = hexString + hexString.substring(0,2);
+        // } else if (hexString.length > 6) {
+        //     hexString.substring(0,6);
+        // }
+        // hexString = "#" + hexString;
+        return hexString;
     }
 
     function displayData(circle) {
