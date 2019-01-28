@@ -21,61 +21,97 @@ $( document ).ready(function() {
       return 0;
     }
 
+    function getSector(pswd) {
+        ascii = pswd.charCodeAt(0);
+
+        // '0','9' are passwords starting with 0 to 9
+        if(ascii >= 48 && ascii <= 57 )
+            return ascii - 48;
+        // 'a', 'z' are passwords starting 'a' to 'z'
+        if( ascii >= 97 && ascii <= 122)
+            return ascii - 87;
+        // else is any other symbol
+        return 36;
+    }
+
     function formulateData() {
+        // console.log("Test 1");
         resizeContainerHeight = 0;
         resizeContainerWidth = 0;
         var longest = allPasswords[0].password.length;
-        var minDistance = passwordLD[0][1];
-        var maxDistance = passwordLD[0][1];
+        var maxSectors = 37;
+        // var minDistance = passwordLD[0][1];
+        // var maxDistance = passwordLD[0][1];
         finalData = [];
-        for (var i = 1; i<passwordLD.length; i++) {
-            var currentLength = allPasswords[i].password.length;
-            if (longest < currentLength) {
-                longest = currentLength
-            }
-            if(passwordLD[i][1] > maxDistance) {
-                maxDistance = passwordLD[i][1];
-            }
-            if(passwordLD[i][1] < minDistance) {
-                minDistance = passwordLD[i][1];
-            }
+
+        var sectors = [];
+        for(var i=0; i<37; i++) {
+            sectors.push([]);
         }
-        var minRadius = 10;
-        var maxRadius = 500;
+
         for(var i = 0; i<passwordLD.length; i++) {
-            // console.log();
-            var currentLength = allPasswords[i].password.length;
-            var item = [];
-            var radius = ((passwordLD[i][1] - minDistance) / (maxDistance-minDistance)) * (maxRadius - minRadius) + minDistance;
-            var radian = ((Math.PI * 2) * (currentLength-1)) / longest;
-            var getY = Math.sin(radian)*radius;
-            if (getY < 0) {
-                var temp = canvasSizeHeight + -(getY);
-                // console.log(temp, canvasSizeHeight, getY);
+            var sec = getSector(passwordLD[i][0]);
+            sectors[sec].push(passwordLD[i]);
+        }
 
-            } else if (getY > middleSectionY ) {
-                var temp = canvasSizeHeight + (getY);
+        for(var i=0; i<36; i++) {
+            sectors[i].sort(comparator);
+        }
+
+        // for (var i = 1; i<passwordLD.length; i++) {
+            // var currentLength = allPasswords[i].password.length;
+
+            // console.log("Test 2");
+            // if (maxSectors < currentLength) {
+            //     maxSectors = currentLength
+            // }
+
+            // if(passwordLD[i][1] > maxDistance) {
+            //     maxDistance = passwordLD[i][1];
+            // }
+            // if(passwordLD[i][1] < minDistance) {
+            //     minDistance = passwordLD[i][1];
+            // }
+        // }
+        // var minRadius = 10;
+        // var maxRadius = 500;
+        for(var i = 0; i<sectors.length; i++) {
+            for(var j = 0; j<sectors[i].length; j++) {
+
+                var item = [];
+                var radius = (sectors[i][j][1]);
+                // var radius = ((passwordLD[i][1] - minDistance) / (maxDistance-minDistance)) * (maxRadius - minRadius) + minDistance;
+
+                var radian = (Math.PI * 2) * (i/maxSectors);
+                var getY = Math.sin(radian)*radius;
+                var getX = Math.cos(radian)*radius;
+                if (getY < 0) {
+                    var temp = canvasSizeHeight + -(getY);
+                    // console.log(temp, canvasSizeHeight, getY);
+
+                } else if (getY > middleSectionY ) {
+                    var temp = canvasSizeHeight + (getY);
+                }
+
+                if (resizeContainerHeight < temp) {
+                    resizeContainerHeight = temp;
+                }
+                // console.log("Highest height = " + resizeContainerHeight);
+
+                if (getX < 0) {
+                    var temp = canvasSizeWidth + -(getX);
+                    // console.log(temp, canvasSizeWidth, getX);
+
+                } else if (getX > middleSectionX ) {
+                    var temp = canvasSizeWidth + (getX);
+                }
+
+                if (resizeContainerWidth < temp) {
+                    resizeContainerWidth = temp;
+                }
+                item.push(getY, getX, radius, sectors[i][j][0],sectors[i][j][1]);
+                finalData.push(item);
             }
-
-            if (resizeContainerHeight < temp) {
-                resizeContainerHeight = temp;
-            }
-            // console.log("Highest height = " + resizeContainerHeight);
-            var getX = Math.cos(radian)*radius;
-
-            if (getX < 0) {
-                var temp = canvasSizeWidth + -(getX);
-                // console.log(temp, canvasSizeWidth, getX);
-
-            } else if (getX > middleSectionX ) {
-                var temp = canvasSizeWidth + (getX);
-            }
-
-            if (resizeContainerWidth < temp) {
-                resizeContainerWidth = temp;
-            }
-            item.push(getY, getX, radius, passwordLD[i][0],passwordLD[i][1]);
-            finalData.push(item);
         }
         updatePassCircles();
     }
@@ -99,6 +135,7 @@ $( document ).ready(function() {
     }
 
     function updatePassCircles() {
+        var basicScale = 15;
         resizeContainer();
         resetCircle();
         passValue = $(".password").val();
@@ -120,11 +157,11 @@ $( document ).ready(function() {
 
                 .attr("class", "passCircle")
                 .attr("cx", function(d) {
-                    return (d[1]+middleSectionX);
+                    return ((d[1] * basicScale)+middleSectionX);
                 })
 
                 .attr("cy", function (d, i) {
-                    return (d[0]+middleSectionY);
+                    return ((d[0]* basicScale)+middleSectionY);
                 })
 
                 // Radius will be just 5 for now
@@ -147,7 +184,6 @@ $( document ).ready(function() {
             stripSingleDigit = "00";
         } else {
             stripSingleDigit = stripSingleDigit*10;
-            console.log(stripSingleDigit);
         }
 
         switch (true) {
@@ -219,7 +255,7 @@ $( document ).ready(function() {
             var passLength = allPasswords.length
             for (var i = 0; i< passLength; i++) {
                 var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
-                passwordLD.push([allPasswords[i].password, lDistance]);
+                passwordLD.push([allPasswords[i].password.toLowerCase(), lDistance]);
             }
             passwordLD.sort(comparator);
             formulateData();
