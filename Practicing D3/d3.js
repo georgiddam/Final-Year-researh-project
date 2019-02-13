@@ -12,9 +12,16 @@ $( document ).ready(function() {
     var resizeContainerHeight = 0;
     var resizeContainerWidth = 0;
 
+// Sort by 2nd value
     function comparator(a, b) {
       if (a[1] < b[1]) return -1;
       if (a[1] > b[1]) return 1;
+      return 0;
+    }
+// Sort by 1st value
+    function comparator2(a, b) {
+      if (a[0] < b[0]) return -1;
+      if (a[0] > b[0]) return 1;
       return 0;
     }
 
@@ -65,11 +72,13 @@ $( document ).ready(function() {
                 var angle = (Math.PI * 2) * (i/maxSectors) + ((Math.PI * 2) / maxSectors / sectors[i].length * j);
                 var getY = Math.sin(angle)*radius;
                 var getX = Math.cos(angle)*radius;
-                setScaleSettings(getY, getX);
+
                 item.push(getY, getX, radius, sectors[i][j][0],sectors[i][j][1]);
                 finalData.push(item);
             }
         }
+        checkInitialScale();
+        setScaleSettings();
         updatePassCircles();
     }
 
@@ -77,7 +86,64 @@ $( document ).ready(function() {
         // console.log("Creating Container");
         canvas
             .attr("width", canvasSizeWidth)
-            .attr("height", canvasSizeHeight);
+            .attr("height", canvasSizeHeight)
+            .attr("class", "svgElement");
+    }
+
+    function checkInitialScale() {
+        finalData.sort(comparator);
+        var getNegativeX =  Math.abs(finalData[finalData.length-1][1]);
+        var getPositiveX = Math.abs(finalData[0][1]);
+        finalData.sort(comparator2);
+        var getNegativeY =  Math.abs(finalData[finalData.length-1][0]);
+        var getPositiveY =  Math.abs(finalData[0][0]);
+
+        // Scale negative X
+        var counter1 = 0;
+        while(getNegativeX < 50) {
+            counter1++;
+            getNegativeX = getNegativeX * 2
+        }
+        getNegativeX = getNegativeX/2
+
+        // Scale positive X
+        var counter2 = 0;
+        while(getPositiveX < 50) {
+            counter2++;
+
+            getPositiveX = getPositiveX * 2
+        }
+        getPositiveX = getPositiveX/2
+
+        // Scale negative Y
+        var counter3 = 0;
+        while(getNegativeY < 50) {
+
+            counter3++;
+            getNegativeY = getNegativeY * 2
+        }
+        getNegativeY = getNegativeY/2
+
+        // Scale Positive Y
+        var counter4 = 0;
+        while(getPositiveY < 50) {
+
+            counter4++;
+            getPositiveY = getPositiveY * 2
+        }
+        getPositiveY = getPositiveY/2
+        scaleUp = (counter1 + counter2 + counter3 + counter4);
+        if (scaleUp > 1) {
+            for (var i = 0; i < finalData.length; i++) {
+                finalData[i][0] = finalData[i][0] * scaleUp;
+                finalData[i][1] = finalData[i][1] * scaleUp;
+                var getY = finalData[i][0];
+                var getX = finalData[i][1];
+
+                // setScaleSettings(getY, getX);
+            }
+            setScaleSettings();
+        }
     }
 
     function scaleSizeUp() {
@@ -87,8 +153,9 @@ $( document ).ready(function() {
                 finalData[i][1] = finalData[i][1] * 1.5;
                 var getY = finalData[i][0];
                 var getX = finalData[i][1];
-                setScaleSettings(getY, getX);
+                // setScaleSettings(getY, getX);
             }
+            setScaleSettings();
             updatePassCircles();
         })
     }
@@ -100,44 +167,40 @@ $( document ).ready(function() {
                 finalData[i][1] = finalData[i][1] / 1.5;
                 var getY = finalData[i][0];
                 var getX = finalData[i][1];
-                
-                resizeContainerHeight = 0;
-                resizeContainerWidth = 0;
-                setScaleSettings(getY, getX);
+
+                // setScaleSettings(getY, getX);
             }
+            setScaleSettings();
             updatePassCircles();
         })
     }
 
-    function setScaleSettings(getY, getX) {
+    function setScaleSettings() {
 
-        if (getY < 0) {
-            var temp = canvasSizeHeight + -(getY);
+        finalData.sort(comparator);
+        var getNegativeX = finalData[finalData.length-1][1];
+        var getPositiveX = finalData[0][1];
+        finalData.sort(comparator2);
+        var getNegativeY = finalData[finalData.length-1][0];
+        var getPositiveY = finalData[0][0];
 
-        } else if (getY > middleSectionY ) {
-            var temp = canvasSizeHeight + (getY);
-        }
+        // console.log(getNegativeX + " " + getNegativeY + " " + getPositiveX + " " + getPositiveY);
 
-        if (resizeContainerHeight < temp) {
-            resizeContainerHeight = temp;
-        }
-
-        if (getX < 0) {
-            var temp = canvasSizeWidth + -(getX);
-
-        } else if (getX > middleSectionX ) {
-            var temp = canvasSizeWidth + (getX);
-        }
-
-        if (resizeContainerWidth < temp) {
-            resizeContainerWidth = temp;
-        }
+        var left = Math.abs(getPositiveX) + 5 ;
+        var right = Math.abs(getNegativeX) + 5;
+        var bottom = Math.abs(getNegativeY) + 5;
+        var top = Math.abs(getPositiveY) + 5;
+        resizeContainer(top, bottom, left, right);
     }
 
 
-    function resizeContainer() {
-        $(".container").width(resizeContainerWidth)
-        $(".container").height(resizeContainerHeight)
+    function resizeContainer(top, bottom, left, right) {
+        // console.log(top, bottom, left, right);
+        $(".container").css("paddingTop" , top)
+        $(".container").css("paddingBottom" , bottom)
+        $(".container").css("paddingLeft" , left)
+        $(".container").css("paddingRight" , right)
+        // $(".container").height(resizeContainerHeight)
     }
 
     function resetCircle () {
@@ -147,12 +210,13 @@ $( document ).ready(function() {
     }
 
     function updatePassCircles() {
-        resizeContainer();
+
         resetCircle();
         passValue = $(".password").val();
 
         if (passValue.length != 0 && passValue.trim() != 0 ) {
             // [0] are names and [1] are distances
+        var scale = 1;
         canvas.selectAll("circle")
             .data(finalData)
             .enter()
@@ -168,11 +232,11 @@ $( document ).ready(function() {
 
                 .attr("class", "passCircle")
                 .attr("cx", function(d) {
-                    return ((d[1])+middleSectionX);
+                    return ((d[1]*scale)+middleSectionX);
                 })
 
                 .attr("cy", function (d, i) {
-                    return ((d[0])+middleSectionY);
+                    return ((d[0]*scale)+middleSectionY);
                 })
 
                 // Radius will be just 5 for now
@@ -180,6 +244,7 @@ $( document ).ready(function() {
                     return 5;
                 })
         }
+
     }
 
     function changeColor(d) {
@@ -233,6 +298,14 @@ $( document ).ready(function() {
         };
     }
 
+    function disableInputEnter() {
+        $("input").keydown(function(event) {
+            if (event.keyCode == 13) {
+                event.preventDefault();
+            }
+        })
+    }
+
     function getPassword() {
         $( ".password" ).keyup(delay(function(e) {
             // length = $(".password").val().length;
@@ -243,6 +316,7 @@ $( document ).ready(function() {
                 passwordLD.push([allPasswords[i].password.toLowerCase(), lDistance]);
             }
             passwordLD.sort(comparator);
+
             formulateData();
         }, 1000));
     }
@@ -353,6 +427,9 @@ $( document ).ready(function() {
     createContainer();
     scaleSizeUp();
     scaleSizeDown();
+    disableInputEnter();
+
+
 
 });
 

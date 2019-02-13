@@ -51,7 +51,7 @@
             $previouslyChanged.removeClass('vortexed');
             $previouslyChanged = $(willChange).addClass('vortexed');
             $changed = $(".vortexed")
-            console.log($changed);
+            // console.log($changed);
             displayData($changed);
         });
     };
@@ -60,9 +60,9 @@
         if ($(".circleData")[0]){
             $(".circleData").remove();
         }
-        console.log(data);
+        // console.log(data);
         for (var i = 0; i < data.length; i++) {
-            console.log(data[i]);
+            // console.log(data[i]);
             newData = data[i].__data__
             $(".pass-data").append( '<div class="circleData"> Unhashed Password : ' + newData[3] + '</div>');
             $(".pass-data").append( '<div class="circleData"> Distance from Tested : ' + newData[4] + '</div>');
