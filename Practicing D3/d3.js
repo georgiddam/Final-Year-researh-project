@@ -9,11 +9,8 @@ $( document ).ready(function() {
     var canvas = d3.select(".container").append("svg")
     var text = "";
 
-
     var resizeContainerHeight = 0;
     var resizeContainerWidth = 0;
-
-    // const fastLevenshtein = require('js-levenshtein');
 
     function comparator(a, b) {
       if (a[1] < b[1]) return -1;
@@ -35,17 +32,15 @@ $( document ).ready(function() {
     }
 
     function formulateData() {
-        // console.log("Test 1");
         resizeContainerHeight = 0;
         resizeContainerWidth = 0;
         var longest = allPasswords[0].password.length;
         var maxSectors = 37;
-        // var minDistance = passwordLD[0][1];
-        // var maxDistance = passwordLD[0][1];
+
         finalData = [];
 
         var sectors = [];
-        for(var i=0; i<37; i++) {
+        for(var i=0; i<maxSectors; i++) {
             sectors.push([]);
         }
 
@@ -54,61 +49,23 @@ $( document ).ready(function() {
             sectors[sec].push(passwordLD[i]);
         }
 
-        for(var i=0; i<36; i++) {
+        for(var i=0; i<maxSectors; i++) {
             sectors[i].sort(comparator);
         }
 
-        // for (var i = 1; i<passwordLD.length; i++) {
-            // var currentLength = allPasswords[i].password.length;
 
-            // console.log("Test 2");
-            // if (maxSectors < currentLength) {
-            //     maxSectors = currentLength
-            // }
-
-            // if(passwordLD[i][1] > maxDistance) {
-            //     maxDistance = passwordLD[i][1];
-            // }
-            // if(passwordLD[i][1] < minDistance) {
-            //     minDistance = passwordLD[i][1];
-            // }
-        // }
-        // var minRadius = 10;
-        // var maxRadius = 500;
+        // Go inside the sector
         for(var i = 0; i<sectors.length; i++) {
+            // Look at all the values for this sector
             for(var j = 0; j<sectors[i].length; j++) {
 
                 var item = [];
                 var radius = (sectors[i][j][1]);
-                // var radius = ((passwordLD[i][1] - minDistance) / (maxDistance-minDistance)) * (maxRadius - minRadius) + minDistance;
-
-                var radian = (Math.PI * 2) * (i/maxSectors);
-                var getY = Math.sin(radian)*radius;
-                var getX = Math.cos(radian)*radius;
-                if (getY < 0) {
-                    var temp = canvasSizeHeight + -(getY);
-                    // console.log(temp, canvasSizeHeight, getY);
-
-                } else if (getY > middleSectionY ) {
-                    var temp = canvasSizeHeight + (getY);
-                }
-
-                if (resizeContainerHeight < temp) {
-                    resizeContainerHeight = temp;
-                }
-                // console.log("Highest height = " + resizeContainerHeight);
-
-                if (getX < 0) {
-                    var temp = canvasSizeWidth + -(getX);
-                    // console.log(temp, canvasSizeWidth, getX);
-
-                } else if (getX > middleSectionX ) {
-                    var temp = canvasSizeWidth + (getX);
-                }
-
-                if (resizeContainerWidth < temp) {
-                    resizeContainerWidth = temp;
-                }
+                // Now take the position of each sector
+                var angle = (Math.PI * 2) * (i/maxSectors) + ((Math.PI * 2) / maxSectors / sectors[i].length * j);
+                var getY = Math.sin(angle)*radius;
+                var getX = Math.cos(angle)*radius;
+                setScaleSettings(getY, getX);
                 item.push(getY, getX, radius, sectors[i][j][0],sectors[i][j][1]);
                 finalData.push(item);
             }
@@ -123,6 +80,61 @@ $( document ).ready(function() {
             .attr("height", canvasSizeHeight);
     }
 
+    function scaleSizeUp() {
+        $(".buttonZoomIn").click(function() {
+            for (var i = 0; i < finalData.length; i++) {
+                finalData[i][0] = finalData[i][0] * 1.5;
+                finalData[i][1] = finalData[i][1] * 1.5;
+                var getY = finalData[i][0];
+                var getX = finalData[i][1];
+                setScaleSettings(getY, getX);
+            }
+            updatePassCircles();
+        })
+    }
+
+    function scaleSizeDown() {
+        $(".buttonZoomOut").click(function() {
+            for (var i = 0; i < finalData.length; i++) {
+                finalData[i][0] = finalData[i][0] / 1.5;
+                finalData[i][1] = finalData[i][1] / 1.5;
+                var getY = finalData[i][0];
+                var getX = finalData[i][1];
+                
+                resizeContainerHeight = 0;
+                resizeContainerWidth = 0;
+                setScaleSettings(getY, getX);
+            }
+            updatePassCircles();
+        })
+    }
+
+    function setScaleSettings(getY, getX) {
+
+        if (getY < 0) {
+            var temp = canvasSizeHeight + -(getY);
+
+        } else if (getY > middleSectionY ) {
+            var temp = canvasSizeHeight + (getY);
+        }
+
+        if (resizeContainerHeight < temp) {
+            resizeContainerHeight = temp;
+        }
+
+        if (getX < 0) {
+            var temp = canvasSizeWidth + -(getX);
+
+        } else if (getX > middleSectionX ) {
+            var temp = canvasSizeWidth + (getX);
+        }
+
+        if (resizeContainerWidth < temp) {
+            resizeContainerWidth = temp;
+        }
+    }
+
+
     function resizeContainer() {
         $(".container").width(resizeContainerWidth)
         $(".container").height(resizeContainerHeight)
@@ -135,7 +147,6 @@ $( document ).ready(function() {
     }
 
     function updatePassCircles() {
-        var basicScale = 15;
         resizeContainer();
         resetCircle();
         passValue = $(".password").val();
@@ -157,11 +168,11 @@ $( document ).ready(function() {
 
                 .attr("class", "passCircle")
                 .attr("cx", function(d) {
-                    return ((d[1] * basicScale)+middleSectionX);
+                    return ((d[1])+middleSectionX);
                 })
 
                 .attr("cy", function (d, i) {
-                    return ((d[0]* basicScale)+middleSectionY);
+                    return ((d[0])+middleSectionY);
                 })
 
                 // Radius will be just 5 for now
@@ -208,33 +219,7 @@ $( document ).ready(function() {
             default:
                 hexString = "#000000";
         }
-        // console.log(hexString);
-
-        // var intColor = d[2];
-        // hexString = intColor.toString(16);
-        // hexString = hexString.replace(".", "");
-        // if (hexString.length % 2) {
-        //     hexString = '0' + hexString;
-        // }
-
-        // if (hexString.length == 2){
-        //     hexString = hexString + hexString + hexString;
-        // } else if (hexString.length == 4) {
-        //     hexString = hexString + hexString.substring(0,2);
-        // } else if (hexString.length > 6) {
-        //     hexString.substring(0,6);
-        // }
-        // hexString = "#" + hexString;
         return hexString;
-    }
-
-    function displayData(circle) {
-    //     // console.log(circle);
-    //     if ($(".circleData")[0]){
-    //         $(".circleData").remove();
-    //     }
-    //     $(".pass-data").append( '<div class="circleData"> Unhashed Password : ' + circle[3] + '</div>');
-    //     $(".pass-data").append( '<div class="circleData"> Distance from Tested : ' + circle[4] + '</div>');
     }
 
     function delay(callback, ms) {
@@ -366,6 +351,8 @@ $( document ).ready(function() {
     }
     getPassword();
     createContainer();
+    scaleSizeUp();
+    scaleSizeDown();
 
 });
 
