@@ -222,7 +222,7 @@ $( document ).ready(function() {
             .enter()
                 .append("circle")
                 .on('click', function(d) {
-                    displayData(d);
+                    // displayData(d);
                 })
 
                 .attr("fill", function (d) {
