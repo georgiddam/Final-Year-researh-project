@@ -23,7 +23,7 @@ form {
     display: inline-block;
 }
 
-.buttonZoom {
+.button {
     color: white;
     font-size: 20px;
     text-decoration: none;
@@ -40,17 +40,17 @@ form {
 }
 
 .vortexed {
-    fill: red !important;
+    fill: blue !important;
 }
 .container {
-    /* border: 5px solid red; */
+    margin-left: 25%;
     width: 0;
     height: 0;
-    /* left: 50%; */
     /* transform: translate(-50%, 68px); */
     margin: 0;
     position: relative;
-    top: 68px;
+    top: 100px;
+    display: -webkit-inline-box;
 
 }
 
@@ -78,22 +78,34 @@ form {
 .clear {
     clear: both;
 }
-
+.infoBoxButtons {
+    float:left;
+    margin-top: 9px;
+}
+.zoomButtons {
+    float:right;
+    margin-top: 9px;
+}
+.passwordDetails {
+    margin-top: -9px;
+}
 .noselect {
+    /* margin-right: 25%; */
     border: 2px solid black;
     border-radius: 5px;
     padding: 5px;
     margin-top: 20px;
-    margin-right: 20px;
+    margin-left: 20px;
     overflow: auto;
-    float: right;
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none; /* Non-prefixed version, currently
-                      supported by Chrome and Opera */
+    float: left;
+    z-index: 999;
+    /* position: fixed; */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 /* width */

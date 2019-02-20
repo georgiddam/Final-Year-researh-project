@@ -22,13 +22,6 @@
 
         })
 
-            //
-            //
-            //         // console.log($(".circleData")[0]);
-            //
-            //     }
-            // })
-
             var willChange = [];
 
             $('.passCircle').nearest({
@@ -63,7 +56,6 @@
                 }
                 return false;
             });
-            console.log(isClicked);
             $previouslyChanged.removeClass('vortexed');
             $previouslyChanged = $(willChange).addClass('vortexed');
             $changed = $(".vortexed")

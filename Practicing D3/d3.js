@@ -13,13 +13,13 @@ $( document ).ready(function() {
     var resizeContainerWidth = 0;
 
 // Sort by 2nd value
-    function comparator(a, b) {
+    function sortBySecondVal(a, b) {
       if (a[1] < b[1]) return -1;
       if (a[1] > b[1]) return 1;
       return 0;
     }
 // Sort by 1st value
-    function comparator2(a, b) {
+    function sortByFirstVal(a, b) {
       if (a[0] < b[0]) return -1;
       if (a[0] > b[0]) return 1;
       return 0;
@@ -41,23 +41,26 @@ $( document ).ready(function() {
     function formulateData() {
         resizeContainerHeight = 0;
         resizeContainerWidth = 0;
-        var longest = allPasswords[0].password.length;
+        // Total sectors, 0-9 + a-z + symbols = 37
         var maxSectors = 37;
 
         finalData = [];
 
+        // Create the amount of sectors we will have
         var sectors = [];
         for(var i=0; i<maxSectors; i++) {
             sectors.push([]);
         }
 
+        // pushes the value in the appropriate sector
         for(var i = 0; i<passwordLD.length; i++) {
             var sec = getSector(passwordLD[i][0]);
             sectors[sec].push(passwordLD[i]);
         }
 
+//      Now we sort each sector alphabetically
         for(var i=0; i<maxSectors; i++) {
-            sectors[i].sort(comparator);
+            sectors[i].sort(sortBySecondVal);
         }
 
 
@@ -91,10 +94,10 @@ $( document ).ready(function() {
     }
 
     function checkInitialScale() {
-        finalData.sort(comparator);
+        finalData.sort(sortBySecondVal);
         var getNegativeX =  Math.abs(finalData[finalData.length-1][1]);
         var getPositiveX = Math.abs(finalData[0][1]);
-        finalData.sort(comparator2);
+        finalData.sort(sortByFirstVal);
         var getNegativeY =  Math.abs(finalData[finalData.length-1][0]);
         var getPositiveY =  Math.abs(finalData[0][0]);
 
@@ -146,41 +149,14 @@ $( document ).ready(function() {
         }
     }
 
-    function scaleSizeUp() {
-        $(".buttonZoomIn").click(function() {
-            for (var i = 0; i < finalData.length; i++) {
-                finalData[i][0] = finalData[i][0] * 1.5;
-                finalData[i][1] = finalData[i][1] * 1.5;
-                var getY = finalData[i][0];
-                var getX = finalData[i][1];
-                // setScaleSettings(getY, getX);
-            }
-            setScaleSettings();
-            updatePassCircles();
-        })
-    }
 
-    function scaleSizeDown() {
-        $(".buttonZoomOut").click(function() {
-            for (var i = 0; i < finalData.length; i++) {
-                finalData[i][0] = finalData[i][0] / 1.5;
-                finalData[i][1] = finalData[i][1] / 1.5;
-                var getY = finalData[i][0];
-                var getX = finalData[i][1];
-
-                // setScaleSettings(getY, getX);
-            }
-            setScaleSettings();
-            updatePassCircles();
-        })
-    }
 
     function setScaleSettings() {
 
-        finalData.sort(comparator);
+        finalData.sort(sortBySecondVal);
         var getNegativeX = finalData[finalData.length-1][1];
         var getPositiveX = finalData[0][1];
-        finalData.sort(comparator2);
+        finalData.sort(sortByFirstVal);
         var getNegativeY = finalData[finalData.length-1][0];
         var getPositiveY = finalData[0][0];
 
@@ -263,26 +239,26 @@ $( document ).ready(function() {
         }
 
         switch (true) {
-            case (radius < 10) :
-                hexString = "#00FF" + (radius*10);
+            case (radius < 5) :
+                hexString = "#8000" + (radius*5);
                 break;
-            case (radius < 20):
-                hexString = "#0080" + stripSingleDigit;
+            case (radius < 10):
+                hexString = "#ff00" + stripSingleDigit;
                 break;
-            case (radius < 30):
-                hexString = "#0000" + stripSingleDigit;
+            case (radius < 15):
+                hexString = "#0066" + stripSingleDigit;
                 break;
-            case (radius < 40):
-                hexString = "#00FF" + stripSingleDigit;
+            case (radius < 25):
+                hexString = "#0099" + stripSingleDigit;
+                break;
+            case (radius < 35):
+                hexString = "#33cc" + stripSingleDigit;
                 break;
             case (radius < 50):
-                hexString = "#0080" + stripSingleDigit;
-                break;
-            case (radius < 60):
-                hexString = "#8080" + stripSingleDigit;
+                hexString = "#00cc" + stripSingleDigit;
                 break;
             default:
-                hexString = "#000000";
+                hexString = "#00ff00";
         }
         return hexString;
     }
@@ -302,12 +278,13 @@ $( document ).ready(function() {
         $("input").keydown(function(event) {
             if (event.keyCode == 13) {
                 event.preventDefault();
+                getPassword();
             }
         })
     }
 
     function getPassword() {
-        $( ".password" ).keyup(delay(function(e) {
+        // $( ".password" ).keyup(delay(function(e) {
             // length = $(".password").val().length;
             passwordLD = [];
             var passLength = allPasswords.length
@@ -315,10 +292,55 @@ $( document ).ready(function() {
                 var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
                 passwordLD.push([allPasswords[i].password.toLowerCase(), lDistance]);
             }
-            passwordLD.sort(comparator);
+            passwordLD.sort(sortBySecondVal);
 
             formulateData();
-        }, 1000));
+        // }, 1000));
+    }
+
+// -------------------- BUTTON FUNCTIONALITIES
+    function scaleSizeUp() {
+        $(".buttonZoomIn").click(function() {
+            for (var i = 0; i < finalData.length; i++) {
+                finalData[i][0] = finalData[i][0] * 1.5;
+                finalData[i][1] = finalData[i][1] * 1.5;
+                var getY = finalData[i][0];
+                var getX = finalData[i][1];
+                // setScaleSettings(getY, getX);
+            }
+            setScaleSettings();
+            updatePassCircles();
+        })
+
+
+    }
+
+    function scaleSizeDown() {
+        $(".buttonZoomOut").click(function() {
+            for (var i = 0; i < finalData.length; i++) {
+                finalData[i][0] = finalData[i][0] / 1.5;
+                finalData[i][1] = finalData[i][1] / 1.5;
+                var getY = finalData[i][0];
+                var getX = finalData[i][1];
+
+                // setScaleSettings(getY, getX);
+            }
+            setScaleSettings();
+            updatePassCircles();
+        })
+    }
+
+    function toggleInfo() {
+        $(".toggle").click(function() {
+            var $toggle = $(".pass-data");
+            $toggle.toggle();
+        })
+    }
+
+    function renderPass() {
+        $(".renderPass").click(function() {
+            getPassword();
+        })
     }
 
 
@@ -427,6 +449,8 @@ $( document ).ready(function() {
     createContainer();
     scaleSizeUp();
     scaleSizeDown();
+    toggleInfo();
+    renderPass();
     disableInputEnter();
 
 
