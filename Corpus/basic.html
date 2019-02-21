@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Practice</title>
+        <link href="css/style.css" rel="stylesheet" type="text/css" media="all">
+
+        <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+        </script>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+
+        <script src="js/d3.js"></script>
+		<script src="js/nearest.js"></script>
+        <script src="data/passwordJson.js"></script>
+
+    </head>
+    <body>
+        <ul>
+            <li class="infoBoxButtons">
+                <a class="button toggle" href="#">Toggle Info</a>
+            </li>
+            <li class="passwordDetails">
+                <form>
+                    <div> Password: </div>
+                    <input class="password" type="text" name="firstname" autocomplete="off">
+                </form>
+                    <a class="button renderPass" href="#"><span>Render</span></a>
+            </li>
+            <li class="zoomButtons">
+
+                <a class="button buttonZoomIn" href="#"><span>Zoom In</span></a>
+
+                <a class="button buttonZoomOut" href="#">Zoom Out</a>
+            </li>
+
+        </ul>
+
+        <div class="pass-data noselect"></div>
+
+        <div class="container"></div>
+
+    </body>
+
+</html>

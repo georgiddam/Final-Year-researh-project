@@ -43,7 +43,7 @@ form {
     fill: blue !important;
 }
 .container {
-    margin-left: 25%;
+
     width: 0;
     height: 0;
     /* transform: translate(-50%, 68px); */
@@ -51,18 +51,11 @@ form {
     position: relative;
     top: 100px;
     display: -webkit-inline-box;
-
+    margin-left: 210px;
 }
 
-/* circle {
-    position: relative;
-} */
-
 .container > svg {
-    /* border: 5px solid blue; */
     position: absolute;
-    /* left: 50%; */
-    /* top: 50%; */
     transform: translate(-50%, -50%);
     overflow: visible;
 }
@@ -90,7 +83,6 @@ form {
     margin-top: -9px;
 }
 .noselect {
-    /* margin-right: 25%; */
     border: 2px solid black;
     border-radius: 5px;
     padding: 5px;
@@ -99,7 +91,6 @@ form {
     overflow: auto;
     float: left;
     z-index: 999;
-    /* position: fixed; */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

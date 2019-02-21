@@ -73,8 +73,8 @@ $( document ).ready(function() {
                 var radius = (sectors[i][j][1]);
                 // Now take the position of each sector
                 var angle = (Math.PI * 2) * (i/maxSectors) + ((Math.PI * 2) / maxSectors / sectors[i].length * j);
-                var getY = Math.sin(angle)*radius;
-                var getX = Math.cos(angle)*radius;
+                var getY = (Math.sin(angle)*radius)*5;
+                var getX = (Math.cos(angle)*radius)*5;
 
                 item.push(getY, getX, radius, sectors[i][j][0],sectors[i][j][1]);
                 finalData.push(item);

@@ -1,0 +1,120 @@
+/* * {
+    border: 1px solid black;
+} */
+
+body{
+    margin:0;
+}
+
+ul {
+    background: #917373;
+    padding: 15px 0;
+    text-align: center;
+    margin: 0;
+    position: fixed;
+    width: 100%;
+    z-index: 9999;
+}
+ul li {
+    display: inline-block;
+}
+
+form {
+    display: inline-block;
+}
+
+.button {
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+    margin: 5px 30px;
+    padding: 5px 20px;
+    opacity: 0.7;
+}
+
+.buttonZoom:hover {
+    opacity:1;
+    background: #60606394;
+    border-radius: 5px;
+    padding: 5px 20px;
+}
+
+.vortexed {
+    fill: blue !important;
+}
+.container {
+
+    width: 0;
+    height: 0;
+    /* transform: translate(-50%, 68px); */
+    margin: 0;
+    position: relative;
+    top: 100px;
+    display: -webkit-inline-box;
+    margin-left: 210px;
+}
+
+.container > svg {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+}
+
+
+.pass-data {
+    top: 70px;
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.clear {
+    clear: both;
+}
+.infoBoxButtons {
+    float:left;
+    margin-top: 9px;
+}
+.zoomButtons {
+    float:right;
+    margin-top: 9px;
+}
+.passwordDetails {
+    margin-top: -9px;
+}
+.noselect {
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    margin-top: 20px;
+    margin-left: 20px;
+    overflow: auto;
+    float: left;
+    z-index: 999;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* width */
+.noselect::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+.noselect::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+.noselect::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+.noselect::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
