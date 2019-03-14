@@ -28,6 +28,7 @@ $( document ).ready(function() {
         if(ascii >= 48 && ascii <= 57 )
             return ascii - 48;
         // 'a', 'z' are passwords starting 'a' to 'z'
+        // TODO currently all uppercase are made into lowercase. I need to keep them uppercase and do them in extra sectors
         if( ascii >= 97 && ascii <= 122)
             return ascii - 87;
         // else is any other symbol
@@ -66,6 +67,7 @@ $( document ).ready(function() {
     function getCoordinates(maxSectors, sectors) {
         var t0 = performance.now();
         // Go inside the sector
+        console.log(sectors[0][0][1]);
         for(var i = 0; i<sectors.length; i++) {
             // Look at all the values for this sector
             for(var j = 0; j<sectors[i].length; j++) {
@@ -75,7 +77,7 @@ $( document ).ready(function() {
                 var angle = (Math.PI * 2) * (i/maxSectors) + ((Math.PI * 2) / maxSectors / sectors[i].length * j);
                 var getY = (Math.sin(angle)*radius);
                 var getX = (Math.cos(angle)*radius);
-                // X, Y, radius(I might manipulate), name, radius
+                // X, Y, radius(I might manipulate), name, true radius
                 finalData.push([getY, getX, radius, sectors[i][j][0],sectors[i][j][1]]);
             }
         }
