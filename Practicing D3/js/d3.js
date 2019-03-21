@@ -67,13 +67,12 @@ $( document ).ready(function() {
     function getCoordinates(maxSectors, sectors) {
         var t0 = performance.now();
         // Go inside the sector
-        console.log(sectors[0][0][1]);
         for(var i = 0; i<sectors.length; i++) {
             // Look at all the values for this sector
             for(var j = 0; j<sectors[i].length; j++) {
-
                 var radius = (sectors[i][j][1])*15;
-                // Now take the position of each sector
+                // Now determine the angle by looking using PI formula but also including the total
+                // sectors to make sure they don't overlap
                 var angle = (Math.PI * 2) * (i/maxSectors) + ((Math.PI * 2) / maxSectors / sectors[i].length * j);
                 var getY = (Math.sin(angle)*radius);
                 var getX = (Math.cos(angle)*radius);
