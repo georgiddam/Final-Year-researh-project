@@ -12,9 +12,11 @@
         </script>
         <script src="https://d3js.org/d3.v5.min.js"></script>
 
+		<!-- <script src="js/loadfile.js"></script> -->
         <script src="js/d3.js"></script>
 		<script src="js/nearest.js"></script>
-        <script src="data/passwordJson.js"></script>
+
+        <script src="data/phpbb2.js"></script>
 
     </head>
     <body>
@@ -25,7 +27,7 @@
             <li class="passwordDetails">
                 <form>
                     <div> Password: </div>
-                    <input class="password" type="text" name="firstname" autocomplete="off">
+                    <input class="password" type="password" name="firstname" autocomplete="off">
                 </form>
                     <a class="button renderPass" href="#"><span>Render</span></a>
             </li>
@@ -35,6 +37,8 @@
 
                 <a class="button buttonZoomOut" href="#">Zoom Out</a>
             </li>
+
+            <a class="button download" href="#">Download</a>
 
         </ul>
 

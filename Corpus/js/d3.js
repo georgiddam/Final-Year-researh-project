@@ -1,9 +1,9 @@
 $( document ).ready(function() {
     var passwordLD = [];
-    var allPasswords = passwordData.allPasswords
+    var allPasswords = passwordData.allPasswords;
+
     var canvasSizeWidth = 850;
     var canvasSizeHeight = 850;
-
     var middleSectionX = canvasSizeWidth/2;
     var middleSectionY = canvasSizeHeight/2;
     var canvas = d3.select(".container").append("svg")
@@ -12,18 +12,14 @@ $( document ).ready(function() {
     var resizeContainerHeight = 0;
     var resizeContainerWidth = 0;
 
-// Sort by 2nd value
-    function sortBySecondVal(a, b) {
-      if (a[1] < b[1]) return -1;
-      if (a[1] > b[1]) return 1;
-      return 0;
+    function createContainer() {
+        // console.log("Creating Container");
+        canvas
+            .attr("width", canvasSizeWidth)
+            .attr("height", canvasSizeHeight)
+            .attr("class", "svgElement");
     }
-// Sort by 1st value
-    function sortByFirstVal(a, b) {
-      if (a[0] < b[0]) return -1;
-      if (a[0] > b[0]) return 1;
-      return 0;
-    }
+
 
     function getSector(pswd) {
         ascii = pswd.charCodeAt(0);
@@ -32,18 +28,16 @@ $( document ).ready(function() {
         if(ascii >= 48 && ascii <= 57 )
             return ascii - 48;
         // 'a', 'z' are passwords starting 'a' to 'z'
+        // TODO currently all uppercase are made into lowercase. I need to keep them uppercase and do them in extra sectors
         if( ascii >= 97 && ascii <= 122)
             return ascii - 87;
         // else is any other symbol
         return 36;
     }
 
-    function formulateData() {
-        resizeContainerHeight = 0;
-        resizeContainerWidth = 0;
+    function createDataSectors() {
         // Total sectors, 0-9 + a-z + symbols = 37
         var maxSectors = 37;
-
         finalData = [];
 
         // Create the amount of sectors we will have
@@ -63,95 +57,94 @@ $( document ).ready(function() {
             sectors[i].sort(sortBySecondVal);
         }
 
-
-        // Go inside the sector
-        for(var i = 0; i<sectors.length; i++) {
-            // Look at all the values for this sector
-            for(var j = 0; j<sectors[i].length; j++) {
-
-                var item = [];
-                var radius = (sectors[i][j][1]);
-                // Now take the position of each sector
-                var angle = (Math.PI * 2) * (i/maxSectors) + ((Math.PI * 2) / maxSectors / sectors[i].length * j);
-                var getY = (Math.sin(angle)*radius)*5;
-                var getX = (Math.cos(angle)*radius)*5;
-
-                item.push(getY, getX, radius, sectors[i][j][0],sectors[i][j][1]);
-                finalData.push(item);
-            }
-        }
-        checkInitialScale();
+        getCoordinates(maxSectors, sectors);
+        // checkInitialScale();
         setScaleSettings();
         updatePassCircles();
     }
 
-    function createContainer() {
-        // console.log("Creating Container");
-        canvas
-            .attr("width", canvasSizeWidth)
-            .attr("height", canvasSizeHeight)
-            .attr("class", "svgElement");
-    }
-
-    function checkInitialScale() {
-        finalData.sort(sortBySecondVal);
-        var getNegativeX =  Math.abs(finalData[finalData.length-1][1]);
-        var getPositiveX = Math.abs(finalData[0][1]);
-        finalData.sort(sortByFirstVal);
-        var getNegativeY =  Math.abs(finalData[finalData.length-1][0]);
-        var getPositiveY =  Math.abs(finalData[0][0]);
-
-        // Scale negative X
-        var counter1 = 0;
-        while(getNegativeX < 50) {
-            counter1++;
-            getNegativeX = getNegativeX * 2
-        }
-        getNegativeX = getNegativeX/2
-
-        // Scale positive X
-        var counter2 = 0;
-        while(getPositiveX < 50) {
-            counter2++;
-
-            getPositiveX = getPositiveX * 2
-        }
-        getPositiveX = getPositiveX/2
-
-        // Scale negative Y
-        var counter3 = 0;
-        while(getNegativeY < 50) {
-
-            counter3++;
-            getNegativeY = getNegativeY * 2
-        }
-        getNegativeY = getNegativeY/2
-
-        // Scale Positive Y
-        var counter4 = 0;
-        while(getPositiveY < 50) {
-
-            counter4++;
-            getPositiveY = getPositiveY * 2
-        }
-        getPositiveY = getPositiveY/2
-        scaleUp = (counter1 + counter2 + counter3 + counter4);
-        if (scaleUp > 1) {
-            for (var i = 0; i < finalData.length; i++) {
-                finalData[i][0] = finalData[i][0] * scaleUp;
-                finalData[i][1] = finalData[i][1] * scaleUp;
-                var getY = finalData[i][0];
-                var getX = finalData[i][1];
-
-                // setScaleSettings(getY, getX);
+    // Get coordinates and push inside sectors
+    function getCoordinates(maxSectors, sectors) {
+        var t0 = performance.now();
+        // Go inside the sector
+        for(var i = 0; i<sectors.length; i++) {
+            // Look at all the values for this sector
+            for(var j = 0; j<sectors[i].length; j++) {
+                var radius = (sectors[i][j][1])*15;
+                // Now determine the angle by looking using PI formula but also including the total
+                // sectors to make sure they don't overlap
+                var angle = (Math.PI * 2) * (i/maxSectors) + ((Math.PI * 2) / maxSectors / sectors[i].length * j);
+                var getY = (Math.sin(angle)*radius);
+                var getX = (Math.cos(angle)*radius);
+                // X, Y, radius(I might manipulate), name, true radius
+                finalData.push([getY, getX, radius, sectors[i][j][0],sectors[i][j][1]]);
             }
-            setScaleSettings();
         }
+        var t1 = performance.now();
+        console.log("Call to getCoordinates took " + (t1 - t0) + " milliseconds.")
     }
+
+
+    // function checkInitialScale() {
+    //     finalData.sort(sortBySecondVal);
+    //     var getNegativeX =  Math.abs(finalData[finalData.length-1][1]);
+    //     var getPositiveX = Math.abs(finalData[0][1]);
+    //     finalData.sort(sortByFirstVal);
+    //     var getNegativeY =  Math.abs(finalData[finalData.length-1][0]);
+    //     var getPositiveY =  Math.abs(finalData[0][0]);
+    //
+    //     // Scale negative X
+    //     var counter1 = 0;
+    //     while(getNegativeX < 50) {
+    //         counter1++;
+    //         getNegativeX = getNegativeX * 2
+    //     }
+    //     getNegativeX = getNegativeX/2
+    //
+    //     // Scale positive X
+    //     var counter2 = 0;
+    //     while(getPositiveX < 50) {
+    //         counter2++;
+    //
+    //         getPositiveX = getPositiveX * 2
+    //     }
+    //     getPositiveX = getPositiveX/2
+    //
+    //     // Scale negative Y
+    //     var counter3 = 0;
+    //     while(getNegativeY < 50) {
+    //
+    //         counter3++;
+    //         getNegativeY = getNegativeY * 2
+    //     }
+    //     getNegativeY = getNegativeY/2
+    //
+    //     // Scale Positive Y
+    //     var counter4 = 0;
+    //     while(getPositiveY < 50) {
+    //
+    //         counter4++;
+    //         getPositiveY = getPositiveY * 2
+    //     }
+    //     getPositiveY = getPositiveY/2
+    //     scaleUp = (counter1 + counter2 + counter3 + counter4);
+    //     if (scaleUp > 1) {
+    //         for (var i = 0; i < finalData.length; i++) {
+    //             finalData[i][0] = finalData[i][0] * scaleUp;
+    //             finalData[i][1] = finalData[i][1] * scaleUp;
+    //             var getY = finalData[i][0];
+    //             var getX = finalData[i][1];
+    //
+    //             // setScaleSettings(getY, getX);
+    //         }
+    //         setScaleSettings();
+    //     }
+    // }
 
 
 
     function setScaleSettings() {
+        var t0 = performance.now();
 
         finalData.sort(sortBySecondVal);
         var getNegativeX = finalData[finalData.length-1][1];
@@ -160,23 +153,23 @@ $( document ).ready(function() {
         var getNegativeY = finalData[finalData.length-1][0];
         var getPositiveY = finalData[0][0];
 
-        // console.log(getNegativeX + " " + getNegativeY + " " + getPositiveX + " " + getPositiveY);
-
+        // We add +5 so it doesn't touch corners
         var left = Math.abs(getPositiveX) + 5 ;
         var right = Math.abs(getNegativeX) + 5;
         var bottom = Math.abs(getNegativeY) + 5;
         var top = Math.abs(getPositiveY) + 5;
         resizeContainer(top, bottom, left, right);
+
+        var t1 = performance.now();
+        console.log("Call to setScaleSettings took " + (t1 - t0) + " milliseconds.")
     }
 
 
     function resizeContainer(top, bottom, left, right) {
-        // console.log(top, bottom, left, right);
         $(".container").css("paddingTop" , top)
         $(".container").css("paddingBottom" , bottom)
         $(".container").css("paddingLeft" , left)
         $(".container").css("paddingRight" , right)
-        // $(".container").height(resizeContainerHeight)
     }
 
     function resetCircle () {
@@ -186,6 +179,7 @@ $( document ).ready(function() {
     }
 
     function updatePassCircles() {
+        var t0 = performance.now();
 
         resetCircle();
         passValue = $(".password").val();
@@ -202,7 +196,6 @@ $( document ).ready(function() {
                 })
 
                 .attr("fill", function (d) {
-
                     return changeColor(d);
                 })
 
@@ -220,7 +213,8 @@ $( document ).ready(function() {
                     return 5;
                 })
         }
-
+        var t1 = performance.now();
+        console.log("Call to updatePassCircles took " + (t1 - t0) + " milliseconds.")
     }
 
     function changeColor(d) {
@@ -284,21 +278,55 @@ $( document ).ready(function() {
     }
 
     function getPassword() {
-        // $( ".password" ).keyup(delay(function(e) {
-            // length = $(".password").val().length;
-            passwordLD = [];
-            var passLength = allPasswords.length
-            for (var i = 0; i< passLength; i++) {
-                var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
-                passwordLD.push([allPasswords[i].password.toLowerCase(), lDistance]);
-            }
-            passwordLD.sort(sortBySecondVal);
+        var t0 = performance.now();
 
-            formulateData();
-        // }, 1000));
+        passwordLD = [];
+        var passLength = allPasswords.length
+        for (var i = 0; i< passLength; i++) {
+            var lDistance = levenshtein(passwordData.allPasswords[i].password, $(".password").val());
+            passwordLD.push([allPasswords[i].password.toLowerCase(), lDistance]);
+        }
+        passwordLD.sort(sortBySecondVal);
+
+        var t1 = performance.now();
+        console.log("Call to getPassword took " + (t1 - t0) + " milliseconds.")
+
+        createDataSectors();
+    }
+
+    // Sort by 2nd value
+        function sortBySecondVal(a, b) {
+          if (a[1] < b[1]) return -1;
+          if (a[1] > b[1]) return 1;
+          return 0;
+        }
+    // Sort by 1st value
+        function sortByFirstVal(a, b) {
+          if (a[0] < b[0]) return -1;
+          if (a[0] > b[0]) return 1;
+          return 0;
+        }
+
+    function getDownload() {
+        var svgData = $(".svgElement")[0].outerHTML;
+        var svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"});
+        var downloadLink = document.createElement("a");
+        downloadLink.href = URL.createObjectURL(svgBlob);
+        downloadLink.download = "getGraph.svg";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
     }
 
 // -------------------- BUTTON FUNCTIONALITIES
+
+    function downloadSVG() {
+        $(".download").click(function() {
+            getDownload();
+        })
+    }
+
+
     function scaleSizeUp() {
         $(".buttonZoomIn").click(function() {
             for (var i = 0; i < finalData.length; i++) {
@@ -311,8 +339,6 @@ $( document ).ready(function() {
             setScaleSettings();
             updatePassCircles();
         })
-
-
     }
 
     function scaleSizeDown() {
@@ -445,18 +471,13 @@ $( document ).ready(function() {
 
 
     }
-    getPassword();
     createContainer();
     scaleSizeUp();
     scaleSizeDown();
+    downloadSVG();
     toggleInfo();
     renderPass();
     disableInputEnter();
 
 
-
 });
-
-
-        // https://www.mathopenref.com/coordbasiccircle.html
-        // https://www.maplesoft.com/support/help/maple/view.aspx?path=MathApps%2FStandardEquationofaCircle

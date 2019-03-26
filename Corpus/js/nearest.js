@@ -4,7 +4,7 @@
     var isClicked = false;
     $.fn.vortex = function (radius) {
         if (radius === undefined) {
-            radius = 7;
+            radius = 9;
         }
 
         var radiusSquared = Math.pow(radius, 2),
